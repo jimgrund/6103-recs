@@ -30,8 +30,8 @@ keys_df = pd.read_csv('data/public_layout.csv')
 # DNTAC    - No air conditioning equipment, or unused air conditioning equipment
 # BEDROOMS - number of bedrooms in house
 # WINDOWS  - number of windows in cooled/heated area
-# KWH   - total KWH consumed for the year
-# AUDIT - whether an energy audit has been performed
+# KWH      - total KWH consumed for the year
+# AUDIT    - whether an energy audit has been performed
 working_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','DNTAC','BEDROOMS','WINDOWS','KWH','AUDIT']]
 
 
