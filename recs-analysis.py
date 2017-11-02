@@ -32,6 +32,6 @@ keys_df = pd.read_csv('data/public_layout.csv')
 # WINDOWS  - number of windows in cooled/heated area
 # KWH   - total KWH consumed for the year
 # AUDIT - whether an energy audit has been performed
-working_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','DNTAC''BEDROOMS','WINDOWS','KWH','AUDIT']]
+working_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','DNTAC','BEDROOMS','WINDOWS','KWH','AUDIT']]
 
 
