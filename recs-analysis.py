@@ -1,4 +1,6 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+
 
 #print(keys_df['Variable Name'])
 #x = keys_df.T
@@ -35,3 +37,15 @@ keys_df = pd.read_csv('data/public_layout.csv')
 working_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','DNTAC','BEDROOMS','WINDOWS','KWH','AUDIT']]
 
 
+
+pd.plotting.scatter_matrix(working_energy_df,
+                           figsize=(12, 12),
+                           marker='o',
+                           hist_kwds={'bins': 30},
+                           s=30,
+                           alpha=.8,
+                           cmap='winter')
+
+
+# force the plot window to show
+plt.show(block=True)
