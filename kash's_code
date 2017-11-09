@@ -59,6 +59,17 @@ prediction = knn.predict(X_new)
 print('Prediction:', prediction)
 
 
+##A-a-ron's Random Forest
+from sklearn.ensemble import RandomForestClassifier
+labels=data_energy_df.columns[:]
+XX = data_energy_df.iloc[:, 1:].values
+YY = data_energy_df.iloc[:, 0].values
+forest = RandomForestClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
+forest.fit(XX,YY)
+
+
 ## Do we need one-hot encoding
 ## Do we need to impute or remove nulls (-2)
-## Create 10x10 Scatter plot with x-axis = KWH 
+## Do we need extra variables (ie: sqft)
+## Create 10x10 Scatter plot with x-axis = KWH
+## Front-end design if possible 
