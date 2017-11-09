@@ -11,9 +11,9 @@ os.chdir('C:\\Users\\akash\\Desktop\\GWU\\6103_DataMining_FBradley\\Project_1')
 
 import pandas as pd
 import numpy as np
-#import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split as tts
-from sklearn.neighbors import KNeighborsClassifier as knn
+from sklearn.neighbors import KNeighborsClassifier
+import matplotlib.pyplot as plt
 
 # read in the 2009 survey data from CSV 
 energy_df = pd.read_csv('recs2009_public.csv')
@@ -23,6 +23,7 @@ limit_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE',
                                'AIA_Zone','BEDROOMS',
                                'ADQINSUL','TYPEGLASS',
                                'WINDOWS','DOOR1SUM', 'KWH']]
+del(limit_energy_df)
 
 #Make a scatter plot
 '''
@@ -48,17 +49,53 @@ del(energy_df)
 # split data into training set & test set
 X_train, X_test, Y_train, Y_test =tts(data_energy_df, target_enegry_df, test_size = 0.3, random_state=6103)
 
+# capture results
+train_accuracy = []
+test_accuracy  = []
+
+# knn tuning --> What K should we pick
+# set kNN setting from 1 to 9
+kNN_range = range(1, 11)
+for neighbors in kNN_range:
+  # start Nearest Neighbors Classifier with K of 1
+  knn = KNeighborsClassifier(n_neighbors=neighbors, metric='minkowski', p=2)
+  # train the data using Nearest Neighbors
+  knn.fit(X_train, Y_train)
+  # capture training accuracy
+  train_accuracy.append(knn.score(X_train, Y_train))
+  # predict using the test dataset  
+  Y_pred = knn.predict(X_test)
+  # capture test accuracy
+  test_accuracy.append(knn.score(X_test, Y_test))
+
+# plot results  
+plt.plot(kNN_range, train_accuracy, label='training accuracy')
+plt.plot(kNN_range, test_accuracy,  label='test accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Neighbors')
+plt.legend()
+
 # start Nearest Neighbors Classifier with K of 1
-knn = knn(n_neighbors=1, metric='minkowski', p=2)
+knn = KNeighborsClassifier(n_neighbors=1, metric='minkowski', p=2)
 
 # train the data using Nearest Neighbors
 knn.fit(X_train, Y_train)
 
+# prediction
 X_new = np.array([[2, 2, 2000, 2, 2,2,40,2,2]])
 prediction = knn.predict(X_new)
-print('Prediction:', prediction)
+print('Prediction:', prediction,'KWH')
 
+# accuracy
+Y_pred= knn.predict(X_test)
+print('\nPrediction from X_test:')
+print(Y_pred)
 
+score = knn.score(X_test, Y_test)
+print('Score:', score*100,'%')
+
+# 
+'''
 ##A-a-ron's Random Forest
 from sklearn.ensemble import RandomForestClassifier
 labels=data_energy_df.columns[:]
@@ -66,11 +103,11 @@ XX = data_energy_df.iloc[:, 1:].values
 YY = data_energy_df.iloc[:, 0].values
 forest = RandomForestClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
 forest.fit(XX,YY)
-
+'''
 
 ## Do we need one-hot encoding
 ## Do we need to impute or remove nulls (-2)
 ## Do we need extra variables (ie: sqft)
 ## Create 10x10 Scatter plot with x-axis = KWH
 ## Front-end design if possible 
-## Figure out Accuracy of Data (use IRIS 14/24)
+## Figure out Accuracy of Data (use IRIS Slide 14/24)
