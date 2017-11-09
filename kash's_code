@@ -4,73 +4,61 @@ Created on Tue Oct 24 18:10:57 2017
 
 @author: akash
 """
+########################################
 import os
 # Provide the path here
 os.chdir('C:\\Users\\akash\\Desktop\\GWU\\6103_DataMining_FBradley\\Project_1') 
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split as tts
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsClassifier as knn
 
 # read in the 2009 survey data from CSV 
 energy_df = pd.read_csv('recs2009_public.csv')
 
 # create a dataframe that contains only the columns we care about
-working_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE',
+limit_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE',
                                'AIA_Zone','BEDROOMS',
-                               'KWH','ADQINSUL','TYPEGLASS',
-                               'WINDOWS','DOOR1SUM']]
+                               'ADQINSUL','TYPEGLASS',
+                               'WINDOWS','DOOR1SUM', 'KWH']]
 
-# create a dataframe of records for where solar was reported to be used
-#solar_in_use_df = working_energy_df.loc[working_energy_df['USESOLAR']==1]
-
-# compute average kwh consumed for all solar records
-avg_kwh = sum(working_energy_df['KWH'])/len(working_energy_df.index)
-print(avg_kwh)
-
-pd.plotting.scatter_matrix(working_energy_df,
-                           figsize=(12, 12),
-                           marker='o',
-                           hist_kwds={'bins': 30},
-                           s=30,
-                           alpha=.8,
-                           cmap='winter')
-
-
-# force the plot window to show
-plt.show(block=True)
-
-#Drop any row where -2 is a value? ~~ Or impute using average?? 
-#Split into Train and Test Set
-
-
-########################################
-# split data into training set & test set
-X_train, X_test, y_train, y_test = tts(working_energy_df, working_energy_df, random_state=6103)
-
-pd.plotting.scatter_matrix(working_energy_df, 
-                           c=y_train, 
+#Make a scatter plot
+'''
+pd.plotting.scatter_matrix(limit_energy_df, 
+                           c='KWH', 
                            figsize=(12, 12), 
                            marker='o', 
                            hist_kwds={'bins': 30}, 
                            s=30, 
                            alpha=.8, 
                            cmap='winter')
+'''
+# Create a Dataframe minus Independent Variable
+data_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE',
+                               'AIA_Zone','BEDROOMS',
+                               'ADQINSUL','TYPEGLASS',
+                               'WINDOWS','DOOR1SUM']]
 
+target_enegry_df = energy_df[['KWH']]
+
+del(energy_df)
+
+# split data into training set & test set
+X_train, X_test, Y_train, Y_test =tts(data_energy_df, target_enegry_df, test_size = 0.3, random_state=6103)
 
 # start Nearest Neighbors Classifier with K of 1
-knn = KNeighborsClassifier(n_neighbors=1, metric='minkowski', p=2)
+knn = knn(n_neighbors=1, metric='minkowski', p=2)
 
 # train the data using Nearest Neighbors
-knn.fit(X_train, y_train)
+knn.fit(X_train, Y_train)
 
-# make a prediction of new flower
-#   sepal length of 5.0 cm 
-#   sepal width  of 2.9 cm 
-#   petal length of 1.0 cm 
-#   petal width  of 0.2 cm
-X_new = np.array([[2, 2, 2, 2, 2, 2, 2, 2, 2, 2]])
+X_new = np.array([[2, 2, 2000, 2, 2,2,40,2,2]])
 prediction = knn.predict(X_new)
-print('Prediction:', prediction, 'which is:',working_energy_df,[prediction])
+print('Prediction:', prediction)
+
+
+## Do we need one-hot encoding
+## Do we need to impute or remove nulls (-2)
+## Create 10x10 Scatter plot with x-axis = KWH 
