@@ -73,3 +73,4 @@ forest.fit(XX,YY)
 ## Do we need extra variables (ie: sqft)
 ## Create 10x10 Scatter plot with x-axis = KWH
 ## Front-end design if possible 
+## Figure out Accuracy of Data (use IRIS 14/24)
