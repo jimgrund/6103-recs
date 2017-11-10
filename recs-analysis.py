@@ -38,14 +38,57 @@ working_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUEL
 
 
 
-pd.plotting.scatter_matrix(working_energy_df,
-                           figsize=(12, 12),
-                           marker='o',
-                           hist_kwds={'bins': 30},
-                           s=30,
-                           alpha=.8,
-                           cmap='winter')
+#pd.plotting.scatter_matrix(working_energy_df,
+#                           figsize=(12, 12),
+#                           marker='o',
+#                           hist_kwds={'bins': 30},
+#                           s=30,
+#                           alpha=.8,
+#                           cmap='winter')
+
+
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.cross_validation import cross_val_score
+
+feature_cols = ['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','DNTAC','BEDROOMS','WINDOWS','AUDIT']
+X = working_energy_df[feature_cols]
+y = working_energy_df.KWH
+
+
+############################################################
+## calculate MSE score for each value of max_depth
+## list of values to try
+#max_depth_range = range(1, 8)
+## list to store the average MSE for each value of max_depth
+#all_MSE_scores = []
+
+#for depth in max_depth_range:
+#    treereg = DecisionTreeRegressor(max_depth=depth, random_state=1)
+#    MSE_scores = cross_val_score(treereg, X, y, cv=14, scoring='neg_mean_squared_error')
+#    all_MSE_scores.append(np.mean(np.sqrt(-MSE_scores)))
+
+## plot max_depth (x-axis) versus MSE (y-axis)
+#plt.plot(max_depth_range, all_MSE_scores)
+#plt.xlabel('max_depth')
+#plt.ylabel('MSE (lower is better)')
 
 
 # force the plot window to show
 plt.show(block=True)
+
+
+#treereg = DecisionTreeRegressor(max_depth=6, random_state=1)
+#treereg.fit(X, y)
+
+## "Gini importance" of each feature:
+##    the (normalized) total reduction of error brought by that feature
+#print(pd.DataFrame({'feature':feature_cols, 'importance':treereg.feature_importances_}))
+
+
+#from sklearn.tree import export_graphviz
+#export_graphviz(treereg, out_file='tree_vehicles.dot', feature_names=feature_cols)
