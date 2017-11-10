@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 #print(keys_df['Variable Name'])
@@ -23,6 +24,24 @@ import matplotlib.pyplot as plt
 energy_df = pd.read_csv('data/recs2009_public.csv')
 keys_df = pd.read_csv('data/public_layout.csv')
 
+
+# create KWH_range values to group the energy usage into ranges
+conditions = [
+    (energy_df['KWH'] >= 0) & (energy_df['KWH'] < 1000),
+    (energy_df['KWH'] >= 2000) & (energy_df['KWH'] < 4000),
+    (energy_df['KWH'] >= 4000) & (energy_df['KWH'] < 6000),
+    (energy_df['KWH'] >= 6000) & (energy_df['KWH'] < 8000),
+    (energy_df['KWH'] >= 8000) & (energy_df['KWH'] < 10000),
+    (energy_df['KWH'] >= 10000) & (energy_df['KWH'] < 12000),
+    (energy_df['KWH'] >= 12000) & (energy_df['KWH'] < 14000),
+    (energy_df['KWH'] >= 14000) & (energy_df['KWH'] < 16000),
+    (energy_df['KWH'] >= 16000) & (energy_df['KWH'] < 18000),
+    (energy_df['KWH'] >= 18000) & (energy_df['KWH'] < 20000),
+    (energy_df['KWH'] >= 20000)]
+choices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+energy_df['KWH_range'] = np.select(conditions, choices, default=10)
+
+
 # create a dataframe that contains only the columns we care about
 # WALLTYPE - Major outside wall material
 # ROOFTYPE - Major roofing material
@@ -34,7 +53,28 @@ keys_df = pd.read_csv('data/public_layout.csv')
 # WINDOWS  - number of windows in cooled/heated area
 # KWH      - total KWH consumed for the year
 # AUDIT    - whether an energy audit has been performed
-working_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','DNTAC','BEDROOMS','WINDOWS','KWH','AUDIT']]
+# TOTSQFT  - total square footage of living space
+# KWH_range - classification range of KWH consumed (0 thru 10)
+working_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','DNTAC','BEDROOMS','WINDOWS','KWH','AUDIT','TOTSQFT','KWH_range']]
+
+
+feature_cols = ['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','DNTAC','BEDROOMS','WINDOWS','AUDIT','TOTSQFT']
+X = working_energy_df[feature_cols]
+y = working_energy_df.KWH_range
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -50,14 +90,10 @@ working_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUEL
 
 
 
-import numpy as np
-import matplotlib.pyplot as plt
+
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.cross_validation import cross_val_score
 
-feature_cols = ['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','DNTAC','BEDROOMS','WINDOWS','AUDIT']
-X = working_energy_df[feature_cols]
-y = working_energy_df.KWH
 
 
 ############################################################
