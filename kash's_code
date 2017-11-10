@@ -17,18 +17,42 @@ import numpy as np
 ## DataLoad and Global Filtering
 
 ### read in the 2009 survey data from CSV 
-energy_df = pd.read_csv('recs2009_public.csv')
+complete_energy_df  = pd.read_csv('recs2009_public.csv')
+keys_df = pd.read_csv('public_layout.csv')
 
-### Create MODEL Dataframe (with chosen data)
+### Create More Managable DataFrame
+energy_df = complete_energy_df[['KWH','WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS',
+                          'ADQINSUL','TYPEGLASS', 'WINDOWS','DOOR1SUM']]
+
+########################################
+#Jim's Choices
+
+
+# remove all records where negative values exist
+energy_df = energy_df[(energy_df >= 0).all(1)]
+
+# create KWH_range values to group the energy usage into ranges
+conditions = [
+    (energy_df['KWH'] >= 0) & (energy_df['KWH'] < 1000),
+    (energy_df['KWH'] >= 2000) & (energy_df['KWH'] < 4000),
+    (energy_df['KWH'] >= 4000) & (energy_df['KWH'] < 6000),
+    (energy_df['KWH'] >= 6000) & (energy_df['KWH'] < 8000),
+    (energy_df['KWH'] >= 8000) & (energy_df['KWH'] < 10000),
+    (energy_df['KWH'] >= 10000) & (energy_df['KWH'] < 12000),
+    (energy_df['KWH'] >= 12000) & (energy_df['KWH'] < 14000),
+    (energy_df['KWH'] >= 14000) & (energy_df['KWH'] < 16000),
+    (energy_df['KWH'] >= 16000) & (energy_df['KWH'] < 18000),
+    (energy_df['KWH'] >= 18000) & (energy_df['KWH'] < 20000),
+    (energy_df['KWH'] >= 20000)]
+choices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+energy_df['KWH_range'] = np.select(conditions, choices, default=10)
+
 energy_minusTARGET_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS',
                           'ADQINSUL','TYPEGLASS', 'WINDOWS','DOOR1SUM']]
 
-## Feature_Cols 
-feature_cols = list(energy_minusTARGET_df)
 
+target_energy_df = energy_df[['KWH_range']]
 
-### Create TARGET Dataframe
-target_enegry_df = energy_df[['KWH']]
 
 ########################################
 #MODELING (DECISION TREE)
@@ -38,7 +62,7 @@ from sklearn.cross_validation import cross_val_score
 import matplotlib.pyplot as plt
 
 ## split data into training set & test set for Decision Tree
-X_train, X_test, Y_train, Y_test =tts(energy_minusTARGET_df, target_enegry_df, test_size = 0.3, random_state=6103)
+X_train, X_test, Y_train, Y_test =tts(energy_minusTARGET_df, target_energy_df, test_size = 0.3, random_state=6103)
 
 
 ### X are the features, y are the target KWH
@@ -67,6 +91,8 @@ treereg.fit(X_train, Y_train)
 
 # "Gini importance" of each feature: 
 #    the (normalized) total reduction of error brought by that feature
+## Feature_Cols 
+feature_cols = list(energy_minusTARGET_df)
 print(pd.DataFrame({'feature':feature_cols, 'importance':sorted(treereg.feature_importances_ *1000, reverse = True)}))
 
 
@@ -82,22 +108,29 @@ data_energy_df = energy_minusTARGET_df[['WALLTYPE','ROOFTYPE','YEARMADE',
 feature_cols = list(data_energy_df)
 
 ## split data into training set & test set
-X_train, X_test, Y_train, Y_test =tts(data_energy_df, target_enegry_df, test_size = 0.3, random_state=6103)
+X_train, X_test, Y_train, Y_test =tts(data_energy_df, target_energy_df, test_size = 0.3, random_state=6103)
 
+'''
 ### create a dataframe that contains only the columns we care about
 limit_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE',
                                'AIA_Zone','BEDROOMS',
                                'ADQINSUL','TYPEGLASS',
                                'WINDOWS','DOOR1SUM', 'KWH']]
-
-
+'''
+########################################
 # EDA
+from pandas.tools.plotting import scatter_matrix
 
 ##DV {KWH} Summary
-plt.hist(limit_energy_df.KWH, bins=1000)
+plt.hist(energy_df.KWH, bins=1000)
+plt.savefig('hist_1.png')
+
+plt.hist(energy_df.KWH_range)
+plt.savefig('hist_2.png')
 
 plt.figure()
-plt.boxplot(limit_energy_df.KWH, 0, 'gD')
+plt.boxplot(energy_df.KWH, 0, 'gD')
+
          
 ##Make a scatter plot
 '''
@@ -118,13 +151,12 @@ plt.savefig('scatter_matrix2.png')
 '''
 
 ## make a Scatterplot 3 ,-- My FAVE
-from pandas.tools.plotting import scatter_matrix
-scatter_matrix(limit_energy_df, alpha=0.2, figsize=(6, 6), diagonal='kde')
+scatter_matrix(energy_df, alpha=0.2, figsize=(6, 6), diagonal='kde')
 plt.savefig('scatter_matrix3.png')
 
 #
 del(energy_df)
-del(limit_energy_df)
+#del(limit_energy_df)
 ########################################
 #MODELING (KNN)
 from sklearn.neighbors import KNeighborsClassifier
@@ -134,7 +166,7 @@ from sklearn.neighbors import KNeighborsClassifier
 train_accuracy = []
 test_accuracy  = []
 
-### set kNN setting from 1 to 9
+### set kNN setting from 1 to 11
 kNN_range = range(1, 11)
 for neighbors in kNN_range:
   # start Nearest Neighbors Classifier with K of 1
@@ -155,8 +187,8 @@ plt.ylabel('Accuracy')
 plt.xlabel('Neighbors')
 plt.legend()
 
-## start Nearest Neighbors Classifier with K of 1
-knn = KNeighborsClassifier(n_neighbors=1, metric='minkowski', p=2)
+## start Nearest Neighbors Classifier with K of 7
+knn = KNeighborsClassifier(n_neighbors=7, metric='minkowski', p=2)
 
 ### train the data using Nearest Neighbors
 knn.fit(X_train, Y_train)
