@@ -1,29 +1,37 @@
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.model_selection import train_test_split as tts
+from sklearn.neighbors import KNeighborsClassifier
 
-
-#print(keys_df['Variable Name'])
-#x = keys_df.T
-#print(x)
-
-#str_energy_df = energy_df.astype('str')
-#frames = [str_energy_df, x]
-#result=pd.concat(frames)
-
-
-#results = pd.merge(str_energy_df, keys_df, on='DOEID')
-
-#print(energy_df.dtypes)
-#energy_df.apply(pd.to_object)
-#print(energy_df.astype('str').dtypes)
+# columns we care about
+# WALLTYPE - Major outside wall material
+# ROOFTYPE - Major roofing material
+# YEARMADE - Year housing unit was built
+# AIA_Zone - AIA Climate Zone, based on average temperatures from 1981 - 2010
+# FUELHEAT - Main space heating fuel
+# DNTAC    - No air conditioning equipment, or unused air conditioning equipment
+# BEDROOMS - number of bedrooms in house
+# WINDOWS  - number of windows in cooled/heated area
+# KWH      - total KWH consumed for the year
+# AUDIT    - whether an energy audit has been performed
+# TOTSQFT  - total square footage of living space
+# KWH_range - classification range of KWH consumed (0 thru 10)
+#working_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','DNTAC','BEDROOMS','WINDOWS','KWH','AUDIT','TOTSQFT','KWH_range']]
+feature_cols = ['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','BEDROOMS','WINDOWS','TOTSQFT','KWH']
 
 
 
 # read in the 2009 survey data from CSV
-energy_df = pd.read_csv('data/recs2009_public.csv')
+complete_energy_df = pd.read_csv('data/recs2009_public.csv')
 keys_df = pd.read_csv('data/public_layout.csv')
 
+# copy dataframe columns to new dataframe
+energy_df = complete_energy_df[feature_cols].copy()
+
+# remove all records where negative values exist
+energy_df = energy_df[(energy_df >= 0).all(1)]
 
 # create KWH_range values to group the energy usage into ranges
 conditions = [
@@ -42,26 +50,47 @@ choices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 energy_df['KWH_range'] = np.select(conditions, choices, default=10)
 
 
-# create a dataframe that contains only the columns we care about
-# WALLTYPE - Major outside wall material
-# ROOFTYPE - Major roofing material
-# YEARMADE - Year housing unit was built
-# AIA_Zone - AIA Climate Zone, based on average temperatures from 1981 - 2010
-# FUELHEAT - Main space heating fuel
-# DNTAC    - No air conditioning equipment, or unused air conditioning equipment
-# BEDROOMS - number of bedrooms in house
-# WINDOWS  - number of windows in cooled/heated area
-# KWH      - total KWH consumed for the year
-# AUDIT    - whether an energy audit has been performed
-# TOTSQFT  - total square footage of living space
-# KWH_range - classification range of KWH consumed (0 thru 10)
-working_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','DNTAC','BEDROOMS','WINDOWS','KWH','AUDIT','TOTSQFT','KWH_range']]
 
 
-feature_cols = ['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','DNTAC','BEDROOMS','WINDOWS','AUDIT','TOTSQFT']
-X = working_energy_df[feature_cols]
-y = working_energy_df.KWH_range
 
+data_energy_df = energy_df[feature_cols]
+target_energy_df = energy_df[['KWH_range']]
+
+# split data into training set & test set
+X_train, X_test, Y_train, Y_test =tts(data_energy_df, target_energy_df, test_size = 0.3, random_state=6103)
+
+
+# capture results
+train_accuracy = []
+test_accuracy  = []
+
+# knn tuning --> What K should we pick
+# set kNN setting from 1 to 9
+kNN_range = range(1, 11)
+for neighbors in kNN_range:
+  # start Nearest Neighbors Classifier with K of 1
+  knn = KNeighborsClassifier(n_neighbors=neighbors, metric='minkowski', p=2)
+  # train the data using Nearest Neighbors
+  knn.fit(X_train, Y_train)
+  # capture training accuracy
+  train_accuracy.append(knn.score(X_train, Y_train))
+  # predict using the test dataset
+  Y_pred = knn.predict(X_test)
+  # capture test accuracy
+  test_accuracy.append(knn.score(X_test, Y_test))
+
+# plot results
+plt.plot(kNN_range, train_accuracy, label='training accuracy')
+plt.plot(kNN_range, test_accuracy,  label='test accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Neighbors')
+plt.legend()
+
+# start Nearest Neighbors Classifier with K of 1
+knn = KNeighborsClassifier(n_neighbors=1, metric='minkowski', p=2)
+
+# train the data using Nearest Neighbors
+knn.fit(X_train, Y_train)
 
 
 
