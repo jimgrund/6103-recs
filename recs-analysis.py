@@ -19,7 +19,8 @@ from sklearn.neighbors import KNeighborsClassifier
 # TOTSQFT  - total square footage of living space
 # KWH_range - classification range of KWH consumed (0 thru 10)
 #working_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','DNTAC','BEDROOMS','WINDOWS','KWH','AUDIT','TOTSQFT','KWH_range']]
-feature_cols = ['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','BEDROOMS','WINDOWS','TOTSQFT','KWH']
+feature_cols = ['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','BEDROOMS','WINDOWS','TOTSQFT','KWH','ESWWAC','TYPEGLASS','CENACHP','NUMPC','TVCOLOR']
+feature_cols_minus_target = ['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','FUELHEAT','BEDROOMS','WINDOWS','TOTSQFT','ESWWAC','TYPEGLASS','CENACHP','NUMPC','TVCOLOR']
 
 
 
@@ -53,7 +54,7 @@ energy_df['KWH_range'] = np.select(conditions, choices, default=10)
 
 
 
-data_energy_df = energy_df[feature_cols]
+data_energy_df = energy_df[feature_cols_minus_target]
 target_energy_df = energy_df[['KWH_range']]
 
 # split data into training set & test set
