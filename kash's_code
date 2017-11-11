@@ -21,15 +21,12 @@ complete_energy_df  = pd.read_csv('recs2009_public.csv')
 keys_df = pd.read_csv('public_layout.csv')
 
 ### Create More Managable DataFrame
-energy_df = complete_energy_df[['KWH','WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS',
-                          'ADQINSUL','TYPEGLASS', 'WINDOWS','DOOR1SUM']]
+energy_df = complete_energy_df[['KWH','WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS','ADQINSUL','TYPEGLASS','WINDOWS','DOOR1SUM','FUELHEAT','TOTSQFT','AUDIT','ESWWAC','NUMPC','NHSLDMEM','NUMFRIG','TVCOLOR','TOTROOMS','CENACHP']]
 
 ########################################
-#Jim's Choices
-
 
 # remove all records where negative values exist
-energy_df = energy_df[(energy_df >= 0).all(1)]
+#energy_df = energy_df[(energy_df >= 0).all(1)]
 
 # create KWH_range values to group the energy usage into ranges
 conditions = [
@@ -43,16 +40,30 @@ conditions = [
     (energy_df['KWH'] >= 14000) & (energy_df['KWH'] < 16000),
     (energy_df['KWH'] >= 16000) & (energy_df['KWH'] < 18000),
     (energy_df['KWH'] >= 18000) & (energy_df['KWH'] < 20000),
-    (energy_df['KWH'] >= 20000)]
-choices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-energy_df['KWH_range'] = np.select(conditions, choices, default=10)
+    (energy_df['KWH'] >= 20000) & (energy_df['KWH'] < 30000),
+    (energy_df['KWH'] >= 30000) & (energy_df['KWH'] < 40000),
+    (energy_df['KWH'] >= 50000) & (energy_df['KWH'] < 60000),
+    (energy_df['KWH'] >= 60000) & (energy_df['KWH'] < 70000),
+    (energy_df['KWH'] >= 70000) & (energy_df['KWH'] < 80000),
+    (energy_df['KWH'] >= 80000)]
+choices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15]
+energy_df['KWH_range'] = np.select(conditions, choices, default=16)
 
-energy_minusTARGET_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS',
-                          'ADQINSUL','TYPEGLASS', 'WINDOWS','DOOR1SUM']]
-
+energy_minusTARGET_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS','ADQINSUL','TYPEGLASS','WINDOWS','DOOR1SUM','FUELHEAT','TOTSQFT','AUDIT','ESWWAC','NUMPC','NHSLDMEM','NUMFRIG','TVCOLOR','TOTROOMS','CENACHP']]
 
 target_energy_df = energy_df[['KWH_range']]
 
+#energy_df.isnull().sum()
+# Works
+
+feature_cols = list(energy_minusTARGET_df)
+nulls_df = pd.DataFrame()
+i=0
+while i < len(feature_cols):
+    print(feature_cols[i])
+    print((energy_minusTARGET_df[feature_cols[i]] ==-2).sum())
+    nulls_df[feature_cols[i]] = (energy_minusTARGET_df[feature_cols[i]] ==-2).sum()
+    i+=1
 
 ########################################
 #MODELING (DECISION TREE)
@@ -85,7 +96,7 @@ plt.ylabel('MSE (lower is better)')
 
 # Depth of 6
 
-# max_depth=6 was best, so fit a tree using that parameter
+# max_depth56 was best, so fit a tree using that parameter
 treereg = DecisionTreeRegressor(max_depth=6, random_state=6103)
 treereg.fit(X_train, Y_train)
 
@@ -95,14 +106,10 @@ treereg.fit(X_train, Y_train)
 feature_cols = list(energy_minusTARGET_df)
 print(pd.DataFrame({'feature':feature_cols, 'importance':sorted(treereg.feature_importances_ *1000, reverse = True)}))
 
-
 ########################################
 # DATA FILTERING 
 ### Create a Dataframe Based on Results from Decision Tree Model
-data_energy_df = energy_minusTARGET_df[['WALLTYPE','ROOFTYPE','YEARMADE',
-                               'AIA_Zone','BEDROOMS',
-                               'ADQINSUL','TYPEGLASS',
-                               'WINDOWS','DOOR1SUM']]
+data_energy_df = energy_minusTARGET_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS','ADQINSUL','TYPEGLASS']]
 
 ## Feature_Cols Based on Results from Decision Tree Model
 feature_cols = list(data_energy_df)
@@ -122,18 +129,22 @@ limit_energy_df = energy_df[['WALLTYPE','ROOFTYPE','YEARMADE',
 from pandas.tools.plotting import scatter_matrix
 
 ##DV {KWH} Summary
+'''
 plt.hist(energy_df.KWH, bins=1000)
 plt.savefig('hist_1.png')
+plt.show(block =True)
 
 plt.hist(energy_df.KWH_range)
 plt.savefig('hist_2.png')
+plt.show(block =True)
 
 plt.figure()
 plt.boxplot(energy_df.KWH, 0, 'gD')
+plt.show(block =True)
 
          
 ##Make a scatter plot
-'''
+
 pd.plotting.scatter_matrix(limit_energy_df, 
                            c='KWH', 
                            figsize=(12, 12), 
@@ -148,14 +159,13 @@ pd.plotting.scatter_matrix(limit_energy_df,
 axes = pd.tools.plotting.scatter_matrix(limit_energy_df, alpha=0.2)
 plt.tight_layout()
 plt.savefig('scatter_matrix2.png')
-'''
+
 
 ## make a Scatterplot 3 ,-- My FAVE
 scatter_matrix(energy_df, alpha=0.2, figsize=(6, 6), diagonal='kde')
 plt.savefig('scatter_matrix3.png')
-
-#
-del(energy_df)
+'''
+#del(energy_df)
 #del(limit_energy_df)
 ########################################
 #MODELING (KNN)
@@ -186,6 +196,7 @@ plt.plot(kNN_range, test_accuracy,  label='test accuracy')
 plt.ylabel('Accuracy')
 plt.xlabel('Neighbors')
 plt.legend()
+plt.show(block=True)
 
 ## start Nearest Neighbors Classifier with K of 7
 knn = KNeighborsClassifier(n_neighbors=7, metric='minkowski', p=2)
@@ -201,10 +212,27 @@ print(Y_pred)
 score = knn.score(X_test, Y_test)
 print('Score:', score*100,'%')
 
-### prediction
-X_new = np.array([[2, 2, 2000, 2, 2,2,40,2,2]])
+### Prediction -- KWH_Range
+X_new = np.array([[2, 2, 2000,2,2,2,2]])
+prediction = knn.predict(X_new)
+print('Prediction:', prediction,'KWH Range')
+
+
+### prediction -- KWH
+
+## split data into training set & test set
+target_energy_df = energy_df[['KWH']]
+X_train, X_test, Y_train, Y_test =tts(data_energy_df, target_energy_df, test_size = 0.3, random_state=6103)
+
+## start Nearest Neighbors Classifier with K of 7
+knn = KNeighborsClassifier(n_neighbors=7, metric='minkowski', p=2)
+### train the data using Nearest Neighbors
+knn.fit(X_train, Y_train)
+
+X_new = np.array([[2, 2, 2000,2,2,2,2]])
 prediction = knn.predict(X_new)
 print('Prediction:', prediction,'KWH')
+
 ########################################
 # 
 '''
@@ -217,11 +245,11 @@ forest = RandomForestClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
 forest.fit(XX,YY)
 '''
 
-## Do we need one-hot encoding
-## Do we need to impute or remove nulls (-2)
-## Do we need extra variables (ie: sqft)
-## Create 10x10 Scatter plot with x-axis = KWH
+## Do we need one-hot encoding --> dont think we have to
+## Do we need to impute or remove nulls (-2) --> done
+## Do we need extra variables (ie: sqft) --> yes, need to do 
+## Create 10x10 Scatter plot with x-axis = KWH 
 ## Front-end design if possible 
-## Figure out Accuracy of Data (use IRIS Slide 14/24)
-## Binning process for KWH
-## Remove Outliers maybe
+## Figure out Accuracy of Data (use IRIS Slide 14/24) --> done
+## Binning process for KWH --> automate for n-bins
+## Remove Outliers maybe --> dont think we have to
