@@ -28,16 +28,16 @@ del(keys_df)
 #########################################################
 # Create DataFrame for Model Data
 
-data_energy_df = energy_df.drop('KWH',axis=1,inplace=False)
+data_energy_dfA = energy_df.drop('KWH',axis=1,inplace=False)
 
 # Check for nulls (value = -2)
-feature_cols = list(data_energy_df)
+feature_colsA = list(data_energy_dfA)
 nulls_df = pd.DataFrame()
 i=0
-while i < len(feature_cols):
-    print(feature_cols[i])
-    print((data_energy_df[feature_cols[i]] ==-2).sum())
-    nulls_df[feature_cols[i]] = (data_energy_df[feature_cols[i]] ==-2).sum()
+while i < len(feature_colsA):
+    print(feature_colsA[i])
+    print((data_energy_dfA[feature_colsA[i]] ==-2).sum())
+    nulls_df[feature_colsA[i]] = (data_energy_dfA[feature_colsA[i]] ==-2).sum()
     i+=1
 del(nulls_df)
 del(i)
@@ -51,13 +51,16 @@ del(i)
 data = energy_df['KWH']
 kwh_min = min(energy_df.KWH)
 kwh_max = max(energy_df.KWH)
-kwh_bins = [np.linspace(kwh_min, kwh_max, 1000)]
+kwh_bins = [np.linspace(kwh_min, kwh_max, 2000)]
 kwh_bins = np.ravel(kwh_bins)
-#digitized = np.digitize(data, kwh_bins)
-#kwh_means = [data[digitized == i].mean() for i in range(1,len(kwh_bins))]
+digitized = np.digitize(data, kwh_bins)
+kwh_means = [data[digitized == i].mean() for i in range(1,len(kwh_bins))]
 #^^ delete these two hashs 
 labels = ['kwh_range_mean']
-kwh_bins = pd.DataFrame(kwh_bins, columns = labels)
+#kwh_bins = pd.DataFrame(kwh_bins, columns=labels)
+kwh_bins = pd.DataFrame(kwh_means, columns = labels)
+
+kwh_bins = kwh_bins[np.isfinite(kwh_bins['kwh_range_mean'])]
 
 del(data)
 del(kwh_min)
@@ -76,7 +79,7 @@ from sklearn.cross_validation import cross_val_score
 import matplotlib.pyplot as plt
 
 ## split data into training set & test set for Decision Tree
-X_train, X_test, Y_train, Y_test =tts(data_energy_df, target_energy_df, test_size = 0.3, random_state=6103)
+X_train, X_test, Y_train, Y_test =tts(data_energy_dfA, target_energy_df, test_size = 0.3, random_state=6103)
 
 ### X are the features, y are the target KWH
 
@@ -108,26 +111,27 @@ treereg.fit(X_train, Y_train)
 ## Feature_Cols 
 #feature_cols = list(data_energy_df)
 # ^^ Delete later
-print(pd.DataFrame({'feature':feature_cols, 'importance':sorted(treereg.feature_importances_ *1000, reverse = True)}))
+print(pd.DataFrame({'feature':feature_colsA, 'importance':sorted(treereg.feature_importances_ *1000, reverse = True)}))
 
 #########################################################
 # DATA FILTERING 
 ### Create a Dataframe Based on Results from Decision Tree Model
-data_energy_df = data_energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS','ADQINSUL']]
+data_energy_dfB = data_energy_dfA[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS','ADQINSUL']]
+del(data_energy_dfA)
 
 ## Feature_Cols Based on Results from Decision Tree Model
-#feature_cols = list(data_energy_df)
-#delete this hash
+feature_cols = list(data_energy_dfB)
+
 
 ## split data into training set & test set
-X_train, X_test, Y_train, Y_test =tts(data_energy_df, target_energy_df, test_size = 0.3, random_state=6103)
+X_train, X_test, Y_train, Y_test =tts(data_energy_dfB, target_energy_df, test_size = 0.3, random_state=6103)
 
 #########################################################
 # EDA
 from pandas.tools.plotting import scatter_matrix
 
 ### create a dataframe that contains only the columns we care about
-model_energy_df = pd.merge(data_energy_df,target_energy_df, left_index=True, right_index=True)
+model_energy_df = pd.merge(data_energy_dfB,target_energy_df, left_index=True, right_index=True)
 
 ##DV {KWH} Summary
 '''
@@ -198,7 +202,7 @@ print('Prediction:', prediction,'KWH Range Mean')
 
 ## split data into training set & test set
 target_energy_df = energy_df[['KWH']]
-X_train, X_test, Y_train, Y_test =tts(data_energy_df, target_energy_df, test_size = 0.3, random_state=6103)
+X_train, X_test, Y_train, Y_test =tts(data_energy_dfB, target_energy_df, test_size = 0.3, random_state=6103)
 
 ## start Nearest Neighbors Classifier with K of 7
 knn = KNeighborsClassifier(n_neighbors=7, metric='minkowski', p=2)
