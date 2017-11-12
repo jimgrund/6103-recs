@@ -61,20 +61,20 @@ class Application(Frame):
         self.bedrooms.grid(row=22, column=1, sticky=NW)
         
         self.adqinsul_text = Label(self, text = "Adequate Insulation:")
-        self.adqinsul_text.grid(row=22, column=0, columnspan=1, sticky = NW)
+        self.adqinsul_text.grid(row=23, column=0, columnspan=1, sticky = NW)
         
         self.adqinsul_list = Listbox(self, selectmode=SINGLE, height=4)
-        self.adqinsul_list.grid(row=22, column=1, rowspan=4, sticky=NW)
+        self.adqinsul_list.grid(row=23, column=1, rowspan=4, sticky=NW)
         self.adqinsul_list.insert(1,"Well Insulated")   
         self.adqinsul_list.insert(2,"Adequately Insulated")   
         self.adqinsul_list.insert(3,"Poorly Insulated")
         self.adqinsul_list.insert(4,"No Insulation")   
         
         self.submit_button = Button(self, text="Submit", command=self.process)
-        self.submit_button.grid(row=27, column=0, sticky=W)
+        self.submit_button.grid(row=28, column=0, sticky=W)
         
         self.text = Text(self, width=35, height=5, wrap = WORD)
-        self.text.grid(row=29, column=0, columnspan=2, sticky=NW)
+        self.text.grid(row=30, column=0, columnspan=2, sticky=NW)
         
     def process(self):
         walltype = sum(self.walltype_list.curselection(), 1)
