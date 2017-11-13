@@ -48,26 +48,49 @@ del(i)
 #########################################################
 # Create KWH_range values to group the energy usage into ranges
 
-data = energy_df['KWH']
-kwh_min = min(energy_df.KWH)
-kwh_max = max(energy_df.KWH)
-kwh_bins = [np.linspace(kwh_min, kwh_max, 2000)]
+data = energy_df[['KWH']].copy()
+kwh_min = min(energy_df['KWH'])
+kwh_max = max(energy_df['KWH'])
+kwh_bins = [np.linspace(kwh_min, kwh_max, 1000)]
 kwh_bins = np.ravel(kwh_bins)
 digitized = np.digitize(data, kwh_bins)
-kwh_means = [data[digitized == i].mean() for i in range(1,len(kwh_bins))]
+kwh_means = [data[digitized == i].KWH.mean() for i in range(1,len(kwh_bins))]
+kwh_max   = [data[digitized == i].KWH.max()  for i in range(1,len(kwh_bins))]
+kwh_min   = [data[digitized == i].KWH.min()  for i in range(1,len(kwh_bins))]
+
+#result = pd.concat([df1, df4], axis=1, join_axes=[df1.index])
+kwh_means_df = pd.DataFrame(kwh_means, columns = ['kwh_range_mean'])
+kwh_min_df   = pd.DataFrame(kwh_min, columns   = ['kwh_range_min'])
+kwh_max_df   = pd.DataFrame(kwh_max, columns   = ['kwh_range_max'])
+
+kwh_bins     = pd.concat([kwh_means_df, kwh_min_df, kwh_max_df], axis=1)
+#kwh_bins = kwh_bins.fillna(9e8).astype(int)
+
+kwh_bins.dropna(inplace=True)
+
+data['kwh_binned'] = pd.cut(data['KWH'], kwh_bins.dropna()['kwh_range_min'])
+data['kwh_binned'] = pd.IntervalIndex(data['kwh_binned'],dtype='interval[int64]').left
+#data['kwh_binned'] = data['kwh_binned'].astype(int)
+    
+
 #^^ delete these two hashs 
 labels = ['kwh_range_mean']
-#kwh_bins = pd.DataFrame(kwh_bins, columns=labels)
 kwh_bins = pd.DataFrame(kwh_means, columns = labels)
 
-kwh_bins = kwh_bins[np.isfinite(kwh_bins['kwh_range_mean'])]
 
-del(data)
+
+#kwh_bins = kwh_bins[np.isfinite(kwh_bins['kwh_range_mean'])]
+#target_energy_df = kwh_bins[np.isfinite(kwh_bins['kwh_range_mean'])]
+target_energy_df = data[['kwh_binned']].copy()
+target_energy_df['kwh_binned'] = target_energy_df['kwh_binned'].fillna(1e6).astype(int)
+#target_energy_df[['kwh_binned']] = target_energy_df[['kwh_binned']].apply(pd.to_numeric) 
+
+#del(data)
 del(kwh_min)
 del(kwh_max)
 del(labels)
 
-target_energy_df = energy_df[['KWH']]
+#target_energy_df = energy_df[['KWH']]
 #replace with ~~>
 #target_energy_df = energy_df[['KWH_range_mean']]
 
@@ -99,6 +122,8 @@ plt.plot(max_depth_range, all_MSE_scores)
 plt.xlabel('max_depth')
 plt.ylabel('MSE (lower is better)')
 plt.savefig('decisiontree1.png')
+plt.show()
+
 
 # Depth of 6
 
@@ -116,7 +141,7 @@ print(pd.DataFrame({'feature':feature_colsA, 'importance':sorted(treereg.feature
 #########################################################
 # DATA FILTERING 
 ### Create a Dataframe Based on Results from Decision Tree Model
-data_energy_dfB = data_energy_dfA[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS','ADQINSUL']]
+data_energy_dfB = data_energy_dfA[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS','ADQINSUL']].copy()
 del(data_energy_dfA)
 
 ## Feature_Cols Based on Results from Decision Tree Model
@@ -131,7 +156,7 @@ X_train, X_test, Y_train, Y_test =tts(data_energy_dfB, target_energy_df, test_si
 from pandas.tools.plotting import scatter_matrix
 
 ### create a dataframe that contains only the columns we care about
-model_energy_df = pd.merge(data_energy_dfB,target_energy_df, left_index=True, right_index=True)
+model_energy_df = pd.merge(data_energy_dfB, target_energy_df, left_index=True, right_index=True)
 
 ##DV {KWH} Summary
 '''
@@ -170,6 +195,8 @@ for neighbors in kNN_range:
   Y_pred = knn.predict(X_test)
   # capture test accuracy
   test_accuracy.append(knn.score(X_test, Y_test))
+  
+  
 ### plot results  
 plt.plot(kNN_range, train_accuracy, label='training accuracy')
 plt.plot(kNN_range, test_accuracy,  label='test accuracy')
@@ -177,6 +204,7 @@ plt.ylabel('Accuracy')
 plt.xlabel('Neighbors')
 plt.legend()
 plt.savefig('knn_nums1.png')
+plt.show()
 
 ## start Nearest Neighbors Classifier with K of 7
 knn = KNeighborsClassifier(n_neighbors=7, metric='minkowski', p=2)
