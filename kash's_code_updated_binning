@@ -1,0 +1,235 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Oct 24 18:10:57 2017
+
+@author: akash
+"""
+########################################
+# ENVIRONMENT PREP
+import os
+### Provide the path here
+os.chdir('C:\\Users\\akash\\Desktop\\GWU\\6103_DataMining_FBradley\\Project_1') 
+
+### Basic Packages
+import pandas as pd
+import numpy as np
+
+## DataLoad and Global Filtering
+
+### read in the 2009 survey data from CSV 
+complete_energy_df  = pd.read_csv('recs2009_public.csv')
+keys_df = pd.read_csv('public_layout.csv')
+
+### Create More Managable DataFrame
+energy_df = complete_energy_df[['KWH','WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS','ADQINSUL','TYPEGLASS','WINDOWS','DOOR1SUM','FUELHEAT','TOTSQFT','AUDIT','NUMPC','NHSLDMEM','NUMFRIG','TVCOLOR','TOTROOMS']]
+
+del(complete_energy_df)
+del(keys_df)
+#########################################################
+# Create DataFrame for Model Data
+
+data_energy_dfA = energy_df.drop('KWH',axis=1,inplace=False)
+
+# Check for nulls (value = -2)
+feature_colsA = list(data_energy_dfA)
+nulls_df = pd.DataFrame()
+i=0
+while i < len(feature_colsA):
+    print(feature_colsA[i])
+    print((data_energy_dfA[feature_colsA[i]] ==-2).sum())
+    nulls_df[feature_colsA[i]] = (data_energy_dfA[feature_colsA[i]] ==-2).sum()
+    i+=1
+del(nulls_df)
+del(i)
+
+# remove all records where nulls exist (value = -2)
+#data_energy_df = data_energy_df[(data_energy_df >= 0).all(1)]
+
+#########################################################
+# Create KWH_range values to group the energy usage into ranges
+
+data = energy_df['KWH']
+kwh_min = min(energy_df.KWH)
+kwh_max = max(energy_df.KWH)
+kwh_bins = [np.linspace(kwh_min, kwh_max, 2000)]
+kwh_bins = np.ravel(kwh_bins)
+digitized = np.digitize(data, kwh_bins)
+kwh_means = [data[digitized == i].mean() for i in range(1,len(kwh_bins))]
+#^^ delete these two hashs 
+labels = ['kwh_range_mean']
+#kwh_bins = pd.DataFrame(kwh_bins, columns=labels)
+kwh_bins = pd.DataFrame(kwh_means, columns = labels)
+
+kwh_bins = kwh_bins[np.isfinite(kwh_bins['kwh_range_mean'])]
+
+del(data)
+del(kwh_min)
+del(kwh_max)
+del(labels)
+
+target_energy_df = energy_df[['KWH']]
+#replace with ~~>
+#target_energy_df = energy_df[['KWH_range_mean']]
+
+#########################################################
+#MODELING (DECISION TREE)
+from sklearn.model_selection import train_test_split as tts
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.cross_validation import cross_val_score
+import matplotlib.pyplot as plt
+
+## split data into training set & test set for Decision Tree
+X_train, X_test, Y_train, Y_test =tts(data_energy_dfA, target_energy_df, test_size = 0.3, random_state=6103)
+
+### X are the features, y are the target KWH
+
+## list of values to try
+max_depth_range = range(1, 12)
+### list to store the average MSE for each value of max_depth
+all_MSE_scores = []
+
+## calculate MSE score for each value of max_depth
+for depth in max_depth_range:
+    treereg = DecisionTreeRegressor(max_depth=depth, random_state=6103)
+    MSE_scores = cross_val_score(treereg, X_train, Y_train, cv=14, scoring='neg_mean_squared_error')
+    all_MSE_scores.append(np.mean(np.sqrt(-MSE_scores)))
+    
+## plot max_depth (x-axis) versus MSE (y-axis)
+plt.plot(max_depth_range, all_MSE_scores)
+plt.xlabel('max_depth')
+plt.ylabel('MSE (lower is better)')
+plt.savefig('decisiontree1.png')
+
+# Depth of 6
+
+# max_depth56 was best, so fit a tree using that parameter
+treereg = DecisionTreeRegressor(max_depth=6, random_state=6103)
+treereg.fit(X_train, Y_train)
+
+# "Gini importance" of each feature: 
+#    the (normalized) total reduction of error brought by that feature
+## Feature_Cols 
+#feature_cols = list(data_energy_df)
+# ^^ Delete later
+print(pd.DataFrame({'feature':feature_colsA, 'importance':sorted(treereg.feature_importances_ *1000, reverse = True)}))
+
+#########################################################
+# DATA FILTERING 
+### Create a Dataframe Based on Results from Decision Tree Model
+data_energy_dfB = data_energy_dfA[['WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS','ADQINSUL']]
+del(data_energy_dfA)
+
+## Feature_Cols Based on Results from Decision Tree Model
+feature_cols = list(data_energy_dfB)
+
+
+## split data into training set & test set
+X_train, X_test, Y_train, Y_test =tts(data_energy_dfB, target_energy_df, test_size = 0.3, random_state=6103)
+
+#########################################################
+# EDA
+from pandas.tools.plotting import scatter_matrix
+
+### create a dataframe that contains only the columns we care about
+model_energy_df = pd.merge(data_energy_dfB,target_energy_df, left_index=True, right_index=True)
+
+##DV {KWH} Summary
+'''
+plt.hist(model_energy_df.KWH, bins=1000)
+plt.savefig('hist1.png')
+#plt.hist(model_energy_df.KWH_range_means, bins=1000)
+#plt.savefig('hist_2.png')
+
+plt.figure()
+plt.boxplot(model_energy_df.KWH, 0, 'gD')
+plt.savefig('boxplot1.png')
+
+## make a Scatterplot.1
+scatter_matrix(model_energy_df, alpha=0.2, figsize=(6, 6), diagonal='kde')
+plt.savefig('scatter_matrix1.png')
+'''
+del(model_energy_df)
+#########################################################
+#MODELING (KNN)
+from sklearn.neighbors import KNeighborsClassifier
+
+## knn tuning --> What K should we pick
+### capture results
+train_accuracy = []
+test_accuracy  = []
+### set kNN setting from 1 to 11
+kNN_range = range(1, 11)
+for neighbors in kNN_range:
+  # start Nearest Neighbors Classifier with K of 1
+  knn = KNeighborsClassifier(n_neighbors=neighbors, metric='minkowski', p=2)
+  # train the data using Nearest Neighbors
+  knn.fit(X_train, Y_train)
+  # capture training accuracy
+  train_accuracy.append(knn.score(X_train, Y_train))
+  # predict using the test dataset  
+  Y_pred = knn.predict(X_test)
+  # capture test accuracy
+  test_accuracy.append(knn.score(X_test, Y_test))
+### plot results  
+plt.plot(kNN_range, train_accuracy, label='training accuracy')
+plt.plot(kNN_range, test_accuracy,  label='test accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Neighbors')
+plt.legend()
+plt.savefig('knn_nums1.png')
+
+## start Nearest Neighbors Classifier with K of 7
+knn = KNeighborsClassifier(n_neighbors=7, metric='minkowski', p=2)
+
+### train the data using Nearest Neighbors
+knn.fit(X_train, Y_train)
+
+### Model accuracy
+Y_pred= knn.predict(X_test)
+print('\nPrediction from X_test:')
+print(Y_pred)
+
+score = knn.score(X_test, Y_test)
+print('Score:', score*100,'%')
+
+### Prediction -- KWH_Range
+X_new = np.array([[2, 2, 2000,2,2,2]])
+prediction = knn.predict(X_new)
+print('Prediction:', prediction,'KWH Range Mean')
+
+
+### Prediction -- KWH
+
+## split data into training set & test set
+target_energy_df = energy_df[['KWH']]
+X_train, X_test, Y_train, Y_test =tts(data_energy_dfB, target_energy_df, test_size = 0.3, random_state=6103)
+
+## start Nearest Neighbors Classifier with K of 7
+knn = KNeighborsClassifier(n_neighbors=7, metric='minkowski', p=2)
+### train the data using Nearest Neighbors
+knn.fit(X_train, Y_train)
+
+X_new = np.array([[2, 2, 2000,2,2,2]])
+prediction = knn.predict(X_new)
+print('Prediction:', prediction,'KWH')
+
+#########################################################
+# 
+'''
+##A-a-ron's Random Forest
+from sklearn.ensemble import RandomForestClassifier
+labels=data_energy_df.columns[:]
+XX = data_energy_df.iloc[:, 1:].values
+YY = data_energy_df.iloc[:, 0].values
+forest = RandomForestClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
+forest.fit(XX,YY)
+'''
+
+## Do we need one-hot encoding --> dont think we have to
+## Do we need to impute or remove nulls (-2) --> done
+## Do we need extra variables (ie: sqft) --> yes, need to do 
+## Create 10x10 Scatter plot with x-axis = KWH 
+## Front-end design if possible 
+## Figure out Accuracy of Data (use IRIS Slide 14/24) --> done
+## Binning process for KWH --> automate for n-bins
+## Remove Outliers maybe --> dont think we have to
