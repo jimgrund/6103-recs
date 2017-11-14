@@ -84,7 +84,7 @@ class Application(Frame):
         bedrooms = self.bedrooms.get()
         adqinsul = sum(self.adqinsul_list.curselection(), 1)
         ### Prediction -- KWH_Range
-        #X_new = np.array([[walltype, rooftype, yearmade, aia_zone, bedrooms, adqinsul]])
+        X_new = np.array([[walltype, rooftype, yearmade, aia_zone, bedrooms, adqinsul]])
         prediction = knn.predict(X_new)
         prediction_text = "Prediction: %d KWH Range Mean" % prediction
         #print('Prediction:', prediction,'KWH Range Mean')
