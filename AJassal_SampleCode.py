@@ -9,6 +9,7 @@ Question: How Much Electricity Are You Using?
 Using Statistical Models to Predict Your Energy Consumption.
 
 '''
+'''
 from tkinter import *
 
 #WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS','ADQINSUL
@@ -97,7 +98,7 @@ class Application(Frame):
         #prediction_text = "Walltype: %s" % walltype
         self.text.delete(0.0, END)
         self.text.insert(0.0, prediction_text)
-
+'''
 ########################################
 # ENVIRONMENT PREP
 import os
@@ -110,7 +111,7 @@ import pandas as pd
 ## DataLoad and Global Filtering
 
 ### read in the 2009 survey data from CSV 
-complete_energy_df  = pd.read_csv('recs2009_public.csv')
+complete_energy_df  = pd.read_csv('recs2009_public2.csv')
 keys_df = pd.read_csv('public_layout.csv')
 
 ### Create More Managable DataFrame
@@ -151,7 +152,52 @@ x_feature_cols = list(x_energy_df)
 
 ########################################
 # BINNING Y-Variable
+import numpy as np
 
+# create KWH_range values to group the energy usage into ranges
+conditions = [
+     (energy_df['KWH'] >= 0) & (energy_df['KWH'] < 1000),
+     (energy_df['KWH'] >= 2000) & (energy_df['KWH'] < 2500),
+     (energy_df['KWH'] >= 2500) & (energy_df['KWH'] < 3000),
+     (energy_df['KWH'] >= 3000) & (energy_df['KWH'] < 3500),
+     (energy_df['KWH'] >= 3500) & (energy_df['KWH'] < 4500),
+     (energy_df['KWH'] >= 4500) & (energy_df['KWH'] < 5000),
+     (energy_df['KWH'] >= 5000) & (energy_df['KWH'] < 5500),
+     (energy_df['KWH'] >= 5500) & (energy_df['KWH'] < 6000),
+     (energy_df['KWH'] >= 6000) & (energy_df['KWH'] < 6500),
+     (energy_df['KWH'] >= 6500) & (energy_df['KWH'] < 7000),
+     (energy_df['KWH'] >= 7000) & (energy_df['KWH'] < 7500),
+     (energy_df['KWH'] >= 7500) & (energy_df['KWH'] < 8000),
+     (energy_df['KWH'] >= 8000) & (energy_df['KWH'] < 8500),
+     (energy_df['KWH'] >= 8500) & (energy_df['KWH'] < 9000),
+     (energy_df['KWH'] >= 9000) & (energy_df['KWH'] < 9500),
+     (energy_df['KWH'] >= 9500) & (energy_df['KWH'] < 10000),
+     (energy_df['KWH'] >= 10000) & (energy_df['KWH'] < 10500),
+     (energy_df['KWH'] >= 10500) & (energy_df['KWH'] < 11000),
+     (energy_df['KWH'] >= 11000) & (energy_df['KWH'] < 11500),
+     (energy_df['KWH'] >= 11500) & (energy_df['KWH'] < 12000),
+     (energy_df['KWH'] >= 12000) & (energy_df['KWH'] < 12500),
+     (energy_df['KWH'] >= 12500) & (energy_df['KWH'] < 13000),
+     (energy_df['KWH'] >= 13000) & (energy_df['KWH'] < 13500),
+     (energy_df['KWH'] >= 13500) & (energy_df['KWH'] < 14500),
+     (energy_df['KWH'] >= 14500) & (energy_df['KWH'] < 15000),
+     (energy_df['KWH'] >= 15000) & (energy_df['KWH'] < 15500),
+     (energy_df['KWH'] >= 15500) & (energy_df['KWH'] < 16000),
+     (energy_df['KWH'] >= 16000) & (energy_df['KWH'] < 16500),
+     (energy_df['KWH'] >= 16500) & (energy_df['KWH'] < 17000),
+     (energy_df['KWH'] >= 17000) & (energy_df['KWH'] < 17500),
+     (energy_df['KWH'] >= 17500) & (energy_df['KWH'] < 18000),
+     (energy_df['KWH'] >= 18000) & (energy_df['KWH'] < 18500),
+     (energy_df['KWH'] >= 18500) & (energy_df['KWH'] < 19000),
+     (energy_df['KWH'] >= 19000) & (energy_df['KWH'] < 19500),
+     (energy_df['KWH'] >= 19500) & (energy_df['KWH'] < 20000),
+     (energy_df['KWH'] >= 20000) & (energy_df['KWH'] < 25000),
+      (energy_df['KWH'] >= 25000) & (energy_df['KWH'] < 50000),
+      (energy_df['KWH'] >= 50000) & (energy_df['KWH'] < 75000),
+      (energy_df['KWH'] >= 75000)]
+choices=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38]
+energy_df['KWH_range'] = np.select(conditions, choices, default=38)
+y2_energy_df = energy_df[['KWH_range']]
 '''
 data = energy_df[['KWH']].copy()
 kwh_min = min(energy_df['KWH'])
@@ -193,11 +239,10 @@ target_energy_df[['kwh_binned']] = target_energy_df[['kwh_binned']].apply(pd.to_
 '''
 #y_energy_df = energy_df[['KWH']]
 
-y2_energy_df = energy_df[['KWH']]
+#y2_energy_df = energy_df[['KWH']]
 ########################################
 #del(energy_df,x_energy_df, x_feature_cols, y2_energy_df)
 ########################################
-
 #MODELING (DECISION TREE)
 import pandas as pd
 import numpy as np
@@ -253,7 +298,7 @@ x2_energy_df = x_energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','REGIONC','BEDROOMS
 feature_colsB = list(x2_energy_df)
 
 ## split data into training set & test set
-X_train, X_test, Y_train, Y_test =tts(x2_energy_df, y2_energy_df, test_size = 0.3, random_state=6103)
+X_train, X_test, Y_train, Y_test =tts(x2_energy_df, y2_energy_df, test_size = 0.5, random_state=6103)
 ########################################
 del()
 ########################################
@@ -261,23 +306,25 @@ del()
 from pandas.plotting import scatter_matrix
 
 ##DV {KWH} Summary
-'''
-plt.hist(energy_df.kwh_binned, bins = 1000)
+
+plt.hist(energy_df.KWH_range, bins = 39)
+#plt.axis([0,30000,0,160])
+plt.grid = True
 plt.savefig('hist1.png')
 plt.show()
 #plt.hist(energy_df.KWH_range_means, bins=1000)
 #plt.savefig('hist_2.png')
-
+'''
 plt.figure()
 plt.boxplot(energy_df.kwh_binned, 0, 'gD')
 plt.savefig('boxplot1.png')
 plt.show()
-'''
+
 ## make a Scatterplot.1
-scatter_matrix(energy_df, alpha=0.2, figsize=(6, 6), diagonal='kde')
+scatter_matrix(x2_energy_df, alpha=0.2, figsize=(6, 6), diagonal='kde')
 plt.savefig('scatter_matrix1.png')
 plt.show()
-
+'''
 #########################################################
 #MODELING (KNN)
 from sklearn.neighbors import KNeighborsClassifier
@@ -346,12 +393,14 @@ prediction = knn.predict(X_new)
 print('Prediction:', prediction,'KWH')
 '''
 #########################################################
+'''
 root = Tk()
 
 root.title("simple gui")
 root.geometry("400x610")
 app = Application(root)
 root.mainloop()
+'''
 ########################################################
 ########################################################
 # 'WALLTYPE','ROOFTYPE','YEARMADE','REGIONC','BEDROOMS','ADQINSUL'
