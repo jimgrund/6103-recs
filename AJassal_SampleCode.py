@@ -9,10 +9,10 @@ Question: How Much Electricity Are You Using?
 Using Statistical Models to Predict Your Energy Consumption.
 
 '''
-'''
+
 from tkinter import *
 
-#WALLTYPE','ROOFTYPE','YEARMADE','AIA_Zone','BEDROOMS','ADQINSUL
+#WALLTYPE','ROOFTYPE','YEARMADE','REGIONC','BEDROOMS','ADQINSUL
 class Application(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
@@ -57,10 +57,10 @@ class Application(Frame):
         self.yearmade = Entry(self)
         self.yearmade.grid(row=20, column=1, sticky=NW)
         
-        self.aia_zone_text = Label(self, text = "AIA Climate Zone:")
-        self.aia_zone_text.grid(row=21, column=0, columnspan=1, sticky = NW)
-        self.aia_zone = Entry(self)
-        self.aia_zone.grid(row=21, column=1, sticky=NW)
+        self.region_text = Label(self, text = "Region:")
+        self.region_text.grid(row=21, column=0, columnspan=1, sticky = NW)
+        self.region = Entry(self)
+        self.region.grid(row=21, column=1, sticky=NW)
         
         self.bedrooms_text = Label(self, text = "Number of Bedrooms:")
         self.bedrooms_text.grid(row=22, column =0, columnspan=1, sticky = NW)
@@ -87,18 +87,18 @@ class Application(Frame):
         walltype = sum(self.walltype_list.curselection(), 1)
         rooftype = sum(self.rooftype_list.curselection(), 1)
         yearmade = self.yearmade.get()
-        aia_zone = self.aia_zone.get()
+        region = self.region.get()
         bedrooms = self.bedrooms.get()
         adqinsul = sum(self.adqinsul_list.curselection(), 1)
         ### Prediction -- KWH_Range
-        X_new = np.array([[walltype, rooftype, yearmade, aia_zone, bedrooms, adqinsul]])
-        prediction = knn.predict(X_new)
-        prediction_text = "Prediction: %d KWH Range Mean" % prediction
-        #print('Prediction:', prediction,'KWH Range Mean')
+        X3_new = np.array([[walltype, rooftype, yearmade, region, bedrooms, adqinsul]])
+        prediction3 = knn.predict(X3_new)
+        prediction_text = "Prediction: %d KWH" % prediction3
+        #print('Prediction:', prediction3,'KWH Range Mean')
         #prediction_text = "Walltype: %s" % walltype
         self.text.delete(0.0, END)
         self.text.insert(0.0, prediction_text)
-'''
+
 ########################################
 # ENVIRONMENT PREP
 import os
@@ -192,11 +192,15 @@ conditions = [
      (energy_df['KWH'] >= 19000) & (energy_df['KWH'] < 19500),
      (energy_df['KWH'] >= 19500) & (energy_df['KWH'] < 20000),
      (energy_df['KWH'] >= 20000) & (energy_df['KWH'] < 25000),
-      (energy_df['KWH'] >= 25000) & (energy_df['KWH'] < 50000),
-      (energy_df['KWH'] >= 50000) & (energy_df['KWH'] < 75000),
-      (energy_df['KWH'] >= 75000)]
-choices=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38]
-energy_df['KWH_range'] = np.select(conditions, choices, default=38)
+     (energy_df['KWH'] >= 25000) & (energy_df['KWH'] < 35000),
+     (energy_df['KWH'] >= 35000) & (energy_df['KWH'] < 45000),
+     (energy_df['KWH'] >= 45000) & (energy_df['KWH'] < 55000),
+     (energy_df['KWH'] >= 55000) & (energy_df['KWH'] < 75000),
+     (energy_df['KWH'] >= 75000) & (energy_df['KWH'] < 95000),
+     (energy_df['KWH'] >= 95000) & (energy_df['KWH'] < 105000),
+     (energy_df['KWH'] >= 105000)]
+choices=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42]
+energy_df['KWH_range'] = np.select(conditions, choices, default=42)
 y2_energy_df = energy_df[['KWH_range']]
 '''
 data = energy_df[['KWH']].copy()
@@ -280,7 +284,7 @@ plt.show()
 ########################################
 # FEATURE IMPORTANCE
 
-treereg = DecisionTreeRegressor(max_depth=7, random_state=6103)
+treereg = DecisionTreeRegressor(max_depth=5, random_state=6103)
 treereg.fit(X_train, Y_train)
 # max_depth7 was best, so fit a tree using that parameter
 
@@ -293,12 +297,11 @@ del(all_MSE_scores,MSE_scores,depth)
 
 x2_energy_df = x_energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','REGIONC','BEDROOMS','ADQINSUL']].copy()
 
-
 ## Feature_Cols Based on Results from Decision Tree Model
 feature_colsB = list(x2_energy_df)
 
 ## split data into training set & test set
-X_train, X_test, Y_train, Y_test =tts(x2_energy_df, y2_energy_df, test_size = 0.5, random_state=6103)
+X_train, X_test, Y_train, Y_test =tts(x2_energy_df, y2_energy_df, test_size = 0.3, random_state=6103)
 ########################################
 del()
 ########################################
@@ -376,31 +379,36 @@ X_new = np.array([[3, 5,1992,3,3,1]])
 prediction = knn.predict(X_new)
 print('Prediction:', prediction,'KWH Range')
 
-'''
+#########################################################
 ### Prediction -- KWH
 
 ## split data into training set & test set
-target_energy_df = energy_df[['KWH']]
-X_train, X_test, Y_train, Y_test =tts(data_energy_dfB, target_energy_df, test_size = 0.3, random_state=6103)
+y3_energy_df = energy_df[['KWH']]
+X3_train, X3_test, Y3_train, Y3_test =tts(x2_energy_df, y3_energy_df, test_size = 0.3, random_state=6103)
 
 ## start Nearest Neighbors Classifier with K of 7
 knn = KNeighborsClassifier(n_neighbors=7, metric='minkowski', p=2)
 ### train the data using Nearest Neighbors
-knn.fit(X_train, Y_train)
-
-X_new = np.array([[1, 5,1995,3,5,1]])
-prediction = knn.predict(X_new)
-print('Prediction:', prediction,'KWH')
+knn.fit(X3_train, Y3_train)
+Y_pred= knn.predict(X_test)
+print('\nPrediction from X_test:')
+print(Y_pred)
+score = knn.score(X3_test, Y3_test)
+print('Score:', score*100,'%')
+X3_new = np.array([[1, 5,1992,3,5,1]])
+prediction3 = knn.predict(X3_new)
+print('Prediction:', prediction3,'KWH')
+'''
 '''
 #########################################################
-'''
+
 root = Tk()
 
 root.title("simple gui")
 root.geometry("400x610")
 app = Application(root)
 root.mainloop()
-'''
+
 ########################################################
 ########################################################
 # 'WALLTYPE','ROOFTYPE','YEARMADE','REGIONC','BEDROOMS','ADQINSUL'
