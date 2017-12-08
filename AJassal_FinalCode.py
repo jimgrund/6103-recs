@@ -15,18 +15,55 @@ from tkinter import *
 class Application(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
+        #gw_color='#0572ad'
+        gw_color='#558aec'
+        #light_gw_color='#0683c6'
+        light_gw_color='#79a7f9'
+        self.config(bg=gw_color)
         self.grid()
         self.create_form()
         
-    def create_form(self):
-        self.text_desc = Label(self, wraplength=400, text = "Select the options to define the house to predict energy consumption.  All fields are required")
-        self.text_desc.grid(row=0, column=0, columnspan=2, sticky = NW)
+#        img = PhotoImage(file = "gw_monogram_2c_process.gif",master=root)
+#        panel = Label(self, image = img)
+#        panel.pack(side = "bottom", fill = "both", expand = "yes")
         
-        self.walltype_text = Label(self, text = "Wall Type:")
-        self.walltype_text.grid(row=2, column=0, columnspan=1, rowspan=9, sticky = NW)
+        
+    def create_form(self):
+        gw_color='#558aec'
+        #gw_color='#0572ad'
+        #light_gw_color='#0683c6'
+        light_gw_color='#79a7f9'
+        highlight_gw_color='#dcf0fa'
+        
+        
+        # pull in the gw logo image
+        img = PhotoImage(file = "gw_monogram_2c_process.gif", width=200, height=150)
+        # double the image from the default size
+        img = img.zoom(2, 2)
+        # construct a Label object to position the gw image
+        self.gw_image = Label(self, image = img, width=200, height=150, bg=gw_color)
+        self.gw_image.image = img
+        self.gw_image.grid(row=0, column=3, rowspan=3, sticky=W+E+N+S )
 
-        self.walltype_list = Listbox(self, selectmode=SINGLE, height=9,exportselection=0)
-        self.walltype_list.grid(row=3, column=1, rowspan=9, sticky=NW)
+        # pull in stock image for sidebar
+        side_img = PhotoImage(file = "stock.gif", width=200)
+        side_img = side_img.zoom(2,1)
+        self.side_image = Label(self, image=side_img, width=200, bg=gw_color)
+        self.side_image.image = side_img
+        self.side_image.grid(row=3, column=3, rowspan=27, sticky=W+E+N+S)
+
+
+        # Row 0 - header description        
+        self.text_desc = Label(self, wraplength=400, bg=gw_color, text = "Select the options to define the house to predict energy consumption.  All fields are required")
+        self.text_desc.grid(row=0, column=0, columnspan=2, sticky = W)
+        
+        
+        # Row 1
+        self.walltype_text = Label(self, bg=gw_color, text = "Wall Type:")
+        self.walltype_text.grid(row=1, column=0, columnspan=1, rowspan=9, sticky = NW, padx=4, pady=3)
+
+        self.walltype_list = Listbox(self, bg=light_gw_color, highlightcolor=highlight_gw_color, borderwidth=0, selectmode=SINGLE, height=9, exportselection=0, width=22)
+        self.walltype_list.grid(row=1, column=1, rowspan=9, sticky=NW, padx=4, pady=3)
         self.walltype_list.insert(1,"1. Brick")   
         self.walltype_list.insert(2,"2. Wood")   
         self.walltype_list.insert(3,"3. Siding")
@@ -37,11 +74,12 @@ class Application(Frame):
         self.walltype_list.insert(8,"8. Glass")   
         self.walltype_list.insert(9,"9. Other")  
         
-        self.rooftype_text = Label(self, text = "Roof Type:")
-        self.rooftype_text.grid(row=12, column=0, columnspan=1, sticky = NW)
+        # Row 10 - Roof type
+        self.rooftype_text = Label(self, bg=gw_color, text = "Roof Type:")
+        self.rooftype_text.grid(row=10, column=0, columnspan=1, sticky = NW, padx=4, pady=3)
         
-        self.rooftype_list = Listbox(self, selectmode=SINGLE, height=8,exportselection=0)
-        self.rooftype_list.grid(row=12, column=1, rowspan=8, sticky=NW)
+        self.rooftype_list = Listbox(self, bg=light_gw_color, highlightcolor=highlight_gw_color, borderwidth=0, selectmode=SINGLE, height=9, exportselection=0, width=22)
+        self.rooftype_list.grid(row=10, column=1, rowspan=9, sticky=NW, padx=4, pady=3)
         self.rooftype_list.insert(1,"1. Ceramic/Clay Tile")   
         self.rooftype_list.insert(2,"2. Wood Shingles")   
         self.rooftype_list.insert(3,"3. Metal")
@@ -51,36 +89,42 @@ class Application(Frame):
         self.rooftype_list.insert(7,"7. Concrete")   
         self.rooftype_list.insert(8,"8. Other") 
         
-        self.yearmade_text = Label(self, text = "Year House constructed:")
-        self.yearmade_text.grid(row =20, column=0, columnspan=1, sticky = NW)
-        self.yearmade = Entry(self)
-        self.yearmade.grid(row=20, column=1, sticky=NW)
+        # Row 19 - Year constructed
+        self.yearmade_text = Label(self, bg=gw_color, text = "Year House constructed:")
+        self.yearmade_text.grid(row =19, column=0, columnspan=1, sticky = NW, padx=4, pady=3)
+        self.yearmade = Entry(self, bg=light_gw_color, highlightbackground=gw_color, width=22)
+        self.yearmade.grid(row=19, column=1, sticky=NW, padx=4, pady=3)
         
-        self.region_text = Label(self, text = "Region:")
-        self.region_text.grid(row=21, column=0, columnspan=1, sticky = NW)
-        self.region = Entry(self)
-        self.region.grid(row=21, column=1, sticky=NW)
+        # Row 20 - Region
+        self.region_text = Label(self, bg=gw_color, text = "Region:")
+        self.region_text.grid(row=20, column=0, columnspan=1, sticky = NW, padx=4, pady=3)
+        self.region = Entry(self, bg=light_gw_color, highlightbackground=gw_color, width=22)
+        self.region.grid(row=20, column=1, sticky=NW, padx=4, pady=3)
         
-        self.bedrooms_text = Label(self, text = "Number of Bedrooms:")
-        self.bedrooms_text.grid(row=22, column =0, columnspan=1, sticky = NW)
-        self.bedrooms = Entry(self)
-        self.bedrooms.grid(row=22, column=1, sticky=NW)
+        # Row 21 - # bedrooms
+        self.bedrooms_text = Label(self, bg=gw_color, text = "Number of Bedrooms:")
+        self.bedrooms_text.grid(row=21, column =0, columnspan=1, sticky = NW, padx=4, pady=3)
+        self.bedrooms = Entry(self, bg=light_gw_color, highlightbackground=gw_color, width=22)
+        self.bedrooms.grid(row=21, column=1, sticky=NW, padx=4, pady=3)
         
-        self.adqinsul_text = Label(self, text = "Adequate Insulation:")
-        self.adqinsul_text.grid(row=23, column=0, columnspan=1, sticky = NW)
+        # Row 22 - adequate insulation
+        self.adqinsul_text = Label(self, bg=gw_color, text = "Adequate Insulation:")
+        self.adqinsul_text.grid(row=22, column=0, columnspan=1, sticky = NW, padx=4, pady=3)
         
-        self.adqinsul_list = Listbox(self, selectmode=SINGLE, height=4,exportselection=0)
-        self.adqinsul_list.grid(row=23, column=1, rowspan=4, sticky=NW)
+        self.adqinsul_list = Listbox(self, bg=light_gw_color, highlightcolor=highlight_gw_color, borderwidth=0, selectmode=SINGLE, height=4, exportselection=0, width=22)
+        self.adqinsul_list.grid(row=22, column=1, rowspan=4, sticky=NW, padx=4, pady=3)
         self.adqinsul_list.insert(1,"1. Well Insulated")   
         self.adqinsul_list.insert(2,"2. Adequately Insulated")   
         self.adqinsul_list.insert(3,"3. Poorly Insulated")
         self.adqinsul_list.insert(4,"4. No Insulation")   
         
-        self.submit_button = Button(self, text="Submit", command=self.process)
-        self.submit_button.grid(row=28, column=0, sticky=W)
+        # Row 26 - submit button
+        self.submit_button = Button(self, bg=gw_color, highlightbackground=gw_color, text="Submit", command=self.process)
+        self.submit_button.grid(row=26, column=0, sticky=W, padx=4, pady=3)
         
-        self.text = Text(self, width=35, height=5, wrap = WORD)
-        self.text.grid(row=30, column=0, columnspan=2, sticky=NW)
+        # Row 28 - text window for output
+        self.text = Text(self, bg=light_gw_color, highlightbackground=gw_color, width=55, height=5, wrap = WORD)
+        self.text.grid(row=28, column=0, columnspan=2, sticky=NW, padx=4, pady=3)
         
     def process(self):
         walltype = sum(self.walltype_list.curselection(), 1)
@@ -104,6 +148,8 @@ import os
 
 ### Provide the path here
 os.chdir('C:\\Users\\akash\\Desktop\\GWU\\6103_DataMining_FBradley\\Project_1') 
+#os.chdir('/Users/jimgrund/PycharmProjects/dats6103-recs/data/') 
+
 
 ### Basic Packages
 import pandas as pd
@@ -326,8 +372,9 @@ del(X_train, X_test, Y_train, Y_test)
 
 root = Tk()
 
-root.title("simple gui")
-root.geometry("400x610")
+root.title("Home Energy Estimation")
+root.geometry("600x780")
+root.resizable(width=FALSE, height=FALSE)
 app = Application(root)
 root.mainloop()
 
