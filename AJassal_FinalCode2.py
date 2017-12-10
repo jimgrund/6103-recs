@@ -75,10 +75,10 @@ class Application(Frame):
         
         # Row 10 - Roof type
         self.rooftype_text = Label(self, bg=gw_color, text = "Roof Type:")
-        self.rooftype_text.grid(row=8, column=0, columnspan=1, sticky = NW, padx=1, pady=1)
+        self.rooftype_text.grid(row=9, column=0, columnspan=1, sticky = NW, padx=1, pady=1)
         
         self.rooftype_list = Listbox(self, bg=light_gw_color, highlightcolor=highlight_gw_color, borderwidth=0, selectmode=SINGLE, height=8, exportselection=0, width=22)
-        self.rooftype_list.grid(row=8, column=1, rowspan=8, sticky=NW, padx=1, pady=1)
+        self.rooftype_list.grid(row=9, column=1, rowspan=8, sticky=NW, padx=1, pady=1)
         self.rooftype_list.insert(1,"1. Ceramic/Clay Tile")   
         self.rooftype_list.insert(2,"2. Wood Shingles")   
         self.rooftype_list.insert(3,"3. Metal")
@@ -90,15 +90,15 @@ class Application(Frame):
         
         # Row 19 - Year constructed
         self.yearmade_text = Label(self, bg=gw_color, text = "Year House Constructed:\n(1920-2009)")
-        self.yearmade_text.grid(row =19, column=0, columnspan=1, sticky = NW, padx=1, pady=1)
+        self.yearmade_text.grid(row =17, column=0, columnspan=1, sticky = NW, padx=1, pady=1)
         self.yearmade = Entry(self, bg=light_gw_color, highlightbackground=gw_color, width=22)
-        self.yearmade.grid(row=19, column=1, sticky=NW, padx=1, pady=1)
+        self.yearmade.grid(row=17, column=1, sticky=NW, padx=1, pady=1)
         
         # Row 20 - Region
         self.region_list = Label(self, bg=gw_color, text = "Region:")
-        self.region_list.grid(row=20, column=0, columnspan=1, sticky = NW, padx=1, pady=1)
+        self.region_list.grid(row=18, column=0, columnspan=1, sticky = NW, padx=1, pady=1)
         self.region_list = Listbox(self, bg=light_gw_color, highlightcolor=highlight_gw_color, borderwidth=0, selectmode=SINGLE, height=4, exportselection=0, width=22)
-        self.region_list.grid(row=20, column=1, rowspan=4, sticky=NW, padx=1, pady=1)
+        self.region_list.grid(row=18, column=1, rowspan=4, sticky=NW, padx=1, pady=1)
         self.region_list.insert(1,"1. Northeast")   
         self.region_list.insert(2,"2. Midwest")   
         self.region_list.insert(3,"3. South")
@@ -108,16 +108,16 @@ class Application(Frame):
         
         # Row 21 - # bedrooms
         self.bedrooms_text = Label(self, bg=gw_color, text = "Number of Bedrooms:\n(1-13)")
-        self.bedrooms_text.grid(row=24, column =0, columnspan=1, sticky = NW, padx=1, pady=1)
+        self.bedrooms_text.grid(row=22, column =0, columnspan=1, sticky = NW, padx=1, pady=1)
         self.bedrooms = Entry(self, bg=light_gw_color, highlightbackground=gw_color, width=22)
-        self.bedrooms.grid(row=24, column=1, sticky=NW, padx=1, pady=1)
+        self.bedrooms.grid(row=22, column=1, sticky=NW, padx=1, pady=1)
         
         # Row 22 - adequate insulation
         self.adqinsul_text = Label(self, bg=gw_color, text = "Adequate Insulation:")
-        self.adqinsul_text.grid(row=25, column=0, columnspan=1, sticky = NW, padx=1, pady=1)
+        self.adqinsul_text.grid(row=23, column=0, columnspan=1, sticky = NW, padx=1, pady=1)
         
         self.adqinsul_list = Listbox(self, bg=light_gw_color, highlightcolor=highlight_gw_color, borderwidth=0, selectmode=SINGLE, height=4, exportselection=0, width=22)
-        self.adqinsul_list.grid(row=25, column=1, rowspan=4, sticky=NW, padx=1, pady=1)
+        self.adqinsul_list.grid(row=23, column=1, rowspan=4, sticky=NW, padx=1, pady=1)
         self.adqinsul_list.insert(1,"1. Well Insulated")   
         self.adqinsul_list.insert(2,"2. Adequately Insulated")   
         self.adqinsul_list.insert(3,"3. Poorly Insulated")
@@ -125,11 +125,11 @@ class Application(Frame):
         
         # Row 26 - submit button
         self.submit_button = Button(self, bg=gw_color, highlightbackground=gw_color, text="Submit", command=self.process)
-        self.submit_button.grid(row=30, column=0, sticky=W, padx=1, pady=1)
+        self.submit_button.grid(row=27, column=0, sticky=W, padx=1, pady=1)
         
         # Row 28 - text window for output
         self.text = Text(self, bg=light_gw_color, highlightbackground=gw_color, width=55, height=3, wrap = WORD)
-        self.text.grid(row=31, column=0, columnspan=2, sticky=NW, padx=1, pady=1)
+        self.text.grid(row=28, column=0, columnspan=2, sticky=NW, padx=1, pady=1)
         
     def process(self):
         walltype = sum(self.walltype_list.curselection(), 1)
@@ -145,7 +145,7 @@ class Application(Frame):
 
         self.text.delete(0.0, END)
         self.text.insert(0.0, prediction_text)
-
+        
 ########################################
 # ENVIRONMENT PREP
 import os
