@@ -59,10 +59,10 @@ class Application(Frame):
         
         # Row 1
         self.walltype_text = Label(self, bg=gw_color, text = "Wall Type:")
-        self.walltype_text.grid(row=1, column=0, columnspan=1, rowspan=9, sticky = NW, padx=4, pady=3)
+        self.walltype_text.grid(row=1, column=0, columnspan=1, rowspan=9, sticky = NW, padx=1, pady=1)
 
         self.walltype_list = Listbox(self, bg=light_gw_color, highlightcolor=highlight_gw_color, borderwidth=0, selectmode=SINGLE, height=9, exportselection=0, width=22)
-        self.walltype_list.grid(row=1, column=1, rowspan=9, sticky=NW, padx=4, pady=3)
+        self.walltype_list.grid(row=1, column=1, rowspan=9, sticky=NW, padx=1, pady=1)
         self.walltype_list.insert(1,"1. Brick")   
         self.walltype_list.insert(2,"2. Wood")   
         self.walltype_list.insert(3,"3. Siding")
@@ -75,10 +75,10 @@ class Application(Frame):
         
         # Row 10 - Roof type
         self.rooftype_text = Label(self, bg=gw_color, text = "Roof Type:")
-        self.rooftype_text.grid(row=10, column=0, columnspan=1, sticky = NW, padx=4, pady=3)
+        self.rooftype_text.grid(row=8, column=0, columnspan=1, sticky = NW, padx=1, pady=1)
         
-        self.rooftype_list = Listbox(self, bg=light_gw_color, highlightcolor=highlight_gw_color, borderwidth=0, selectmode=SINGLE, height=9, exportselection=0, width=22)
-        self.rooftype_list.grid(row=10, column=1, rowspan=9, sticky=NW, padx=4, pady=3)
+        self.rooftype_list = Listbox(self, bg=light_gw_color, highlightcolor=highlight_gw_color, borderwidth=0, selectmode=SINGLE, height=8, exportselection=0, width=22)
+        self.rooftype_list.grid(row=8, column=1, rowspan=8, sticky=NW, padx=1, pady=1)
         self.rooftype_list.insert(1,"1. Ceramic/Clay Tile")   
         self.rooftype_list.insert(2,"2. Wood Shingles")   
         self.rooftype_list.insert(3,"3. Metal")
@@ -89,29 +89,35 @@ class Application(Frame):
         self.rooftype_list.insert(8,"8. Other") 
         
         # Row 19 - Year constructed
-        self.yearmade_text = Label(self, bg=gw_color, text = "Year House constructed:")
-        self.yearmade_text.grid(row =19, column=0, columnspan=1, sticky = NW, padx=4, pady=3)
+        self.yearmade_text = Label(self, bg=gw_color, text = "Year House Constructed:\n(1920-2009)")
+        self.yearmade_text.grid(row =19, column=0, columnspan=1, sticky = NW, padx=1, pady=1)
         self.yearmade = Entry(self, bg=light_gw_color, highlightbackground=gw_color, width=22)
-        self.yearmade.grid(row=19, column=1, sticky=NW, padx=4, pady=3)
+        self.yearmade.grid(row=19, column=1, sticky=NW, padx=1, pady=1)
         
         # Row 20 - Region
-        self.region_text = Label(self, bg=gw_color, text = "Region:")
-        self.region_text.grid(row=20, column=0, columnspan=1, sticky = NW, padx=4, pady=3)
-        self.region = Entry(self, bg=light_gw_color, highlightbackground=gw_color, width=22)
-        self.region.grid(row=20, column=1, sticky=NW, padx=4, pady=3)
+        self.region_list = Label(self, bg=gw_color, text = "Region:")
+        self.region_list.grid(row=20, column=0, columnspan=1, sticky = NW, padx=1, pady=1)
+        self.region_list = Listbox(self, bg=light_gw_color, highlightcolor=highlight_gw_color, borderwidth=0, selectmode=SINGLE, height=4, exportselection=0, width=22)
+        self.region_list.grid(row=20, column=1, rowspan=4, sticky=NW, padx=1, pady=1)
+        self.region_list.insert(1,"1. Northeast")   
+        self.region_list.insert(2,"2. Midwest")   
+        self.region_list.insert(3,"3. South")
+        self.region_list.insert(4,"4. West")   
+        # self.region = Entry(self, bg=light_gw_color, highlightbackground=gw_color, width=22)
+
         
         # Row 21 - # bedrooms
-        self.bedrooms_text = Label(self, bg=gw_color, text = "Number of Bedrooms:")
-        self.bedrooms_text.grid(row=21, column =0, columnspan=1, sticky = NW, padx=4, pady=3)
+        self.bedrooms_text = Label(self, bg=gw_color, text = "Number of Bedrooms:\n(1-13)")
+        self.bedrooms_text.grid(row=24, column =0, columnspan=1, sticky = NW, padx=1, pady=1)
         self.bedrooms = Entry(self, bg=light_gw_color, highlightbackground=gw_color, width=22)
-        self.bedrooms.grid(row=21, column=1, sticky=NW, padx=4, pady=3)
+        self.bedrooms.grid(row=24, column=1, sticky=NW, padx=1, pady=1)
         
         # Row 22 - adequate insulation
         self.adqinsul_text = Label(self, bg=gw_color, text = "Adequate Insulation:")
-        self.adqinsul_text.grid(row=22, column=0, columnspan=1, sticky = NW, padx=4, pady=3)
+        self.adqinsul_text.grid(row=25, column=0, columnspan=1, sticky = NW, padx=1, pady=1)
         
         self.adqinsul_list = Listbox(self, bg=light_gw_color, highlightcolor=highlight_gw_color, borderwidth=0, selectmode=SINGLE, height=4, exportselection=0, width=22)
-        self.adqinsul_list.grid(row=22, column=1, rowspan=4, sticky=NW, padx=4, pady=3)
+        self.adqinsul_list.grid(row=25, column=1, rowspan=4, sticky=NW, padx=1, pady=1)
         self.adqinsul_list.insert(1,"1. Well Insulated")   
         self.adqinsul_list.insert(2,"2. Adequately Insulated")   
         self.adqinsul_list.insert(3,"3. Poorly Insulated")
@@ -119,25 +125,24 @@ class Application(Frame):
         
         # Row 26 - submit button
         self.submit_button = Button(self, bg=gw_color, highlightbackground=gw_color, text="Submit", command=self.process)
-        self.submit_button.grid(row=26, column=0, sticky=W, padx=4, pady=3)
+        self.submit_button.grid(row=30, column=0, sticky=W, padx=1, pady=1)
         
         # Row 28 - text window for output
-        self.text = Text(self, bg=light_gw_color, highlightbackground=gw_color, width=55, height=2, wrap = WORD)
-        self.text.grid(row=28, column=0, columnspan=2, sticky=NW, padx=4, pady=3)
+        self.text = Text(self, bg=light_gw_color, highlightbackground=gw_color, width=55, height=3, wrap = WORD)
+        self.text.grid(row=31, column=0, columnspan=2, sticky=NW, padx=1, pady=1)
         
     def process(self):
         walltype = sum(self.walltype_list.curselection(), 1)
         rooftype = sum(self.rooftype_list.curselection(), 1)
         yearmade = self.yearmade.get()
-        region = self.region.get()
+        region = sum(self.region_list.curselection(), 1)
         bedrooms = self.bedrooms.get()
         adqinsul = sum(self.adqinsul_list.curselection(), 1)
         ### Prediction -- KWH_bin
-        X3_new = np.array([[walltype, rooftype, yearmade, region, bedrooms, adqinsul]])
-        prediction3 = knn3.predict(X3_new)
-        prediction_text = "Prediction: %d KWH" % prediction3
-        #print('Prediction:', prediction3,'KWH Range Mean')
-        #prediction_text = "Walltype: %s" % walltype
+        X3_GUI = np.array([[walltype, rooftype, yearmade, region, bedrooms, adqinsul]])
+        prediction_gui = knn3.predict(X3_GUI)
+        prediction_text = "Prediction: %d KWH" % prediction_gui
+
         self.text.delete(0.0, END)
         self.text.insert(0.0, prediction_text)
 
