@@ -263,7 +263,7 @@ del(all_MSE_scores,MSE_scores,depth)
 # NEW DATAFRAME CREATION 
 ## Based on MODEL-1(Decision Tree)
 
-x2_energy_df = x_energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','DIVISION',
+x2_energy_df = x_energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','REGIONC',
                             'BEDROOMS','ADQINSUL']].copy()
 
 ### Feature_Cols Based on Results from Decision Tree Model
