@@ -122,7 +122,7 @@ class Application(Frame):
         self.submit_button.grid(row=26, column=0, sticky=W, padx=4, pady=3)
         
         # Row 28 - text window for output
-        self.text = Text(self, bg=light_gw_color, highlightbackground=gw_color, width=55, height=5, wrap = WORD)
+        self.text = Text(self, bg=light_gw_color, highlightbackground=gw_color, width=55, height=2, wrap = WORD)
         self.text.grid(row=28, column=0, columnspan=2, sticky=NW, padx=4, pady=3)
         
     def process(self):
@@ -258,7 +258,7 @@ del(all_MSE_scores,MSE_scores,depth)
 # NEW DATAFRAME CREATION 
 ## Based on MODEL-1(Decision Tree)
 
-x2_energy_df = x_energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','REGIONC',
+x2_energy_df = x_energy_df[['WALLTYPE','ROOFTYPE','YEARMADE','DIVISION',
                             'BEDROOMS','ADQINSUL']].copy()
 
 ### Feature_Cols Based on Results from Decision Tree Model
@@ -400,7 +400,7 @@ del(X_train, X_test, Y_train, Y_test)
 root = Tk()
 
 root.title("Home Energy Estimation")
-root.geometry("600x780")
+root.geometry("600x760")
 root.resizable(width=FALSE, height=FALSE)
 app = Application(root)
 root.mainloop()
